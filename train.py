@@ -242,7 +242,7 @@ if __name__ == "__main__":
 
             #   for shallow classifiers
             for index in range(1, len(outputs)):
-                #   logits distillation
+                #   logits distillation.
                 loss += dkd_loss(outputs[index], teacher_output,labels,1,8,args.temperature) * args.loss_coefficient
                 loss += criterion(outputs[index], labels) * (1 - args.loss_coefficient)
                 #   feature distillation
