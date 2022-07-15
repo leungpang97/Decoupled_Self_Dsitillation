@@ -60,7 +60,7 @@ parser.add_argument('--dataset_path', default="data", type=str)
 parser.add_argument('--autoaugment', default=True, type=bool)
 parser.add_argument('--temperature', default=3.0, type=float)
 parser.add_argument('--batchsize', default=128, type=int)
-parser.add_argument('--init_lr', default=0.1, type=float)
+parser.add_argument('--init_lr', default=0.01, type=float)
 args = parser.parse_args()
 print(args)
 
