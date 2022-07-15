@@ -246,12 +246,13 @@ if __name__ == "__main__":
                 **kwargs
                 loss += min(kwargs["epoch"] / 20, 1.0) *dkd_loss(outputs[index], teacher_output,labels,1,8,args.temperature) * args.loss_coefficient
                 loss += criterion(outputs[index], labels) * (1 - args.loss_coefficient)
+                '''
                 #   feature distillation
                 if index != 1:
                     loss += torch.dist(net.adaptation_layers[index-1](outputs_feature[index]), teacher_feature) * \
                             args.feature_loss_coefficient
                     #   the feature distillation loss will not be applied to the shallowest classifier
-
+                '''
             sum_loss += loss.item()
             optimizer.zero_grad()
             loss.backward()
