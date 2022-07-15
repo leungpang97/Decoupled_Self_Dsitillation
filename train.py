@@ -204,7 +204,7 @@ if __name__ == "__main__":
         predicted = [0 for _ in range(5)]
         if epoch in [args.epoch // 3, args.epoch * 2 // 3, args.epoch - 10]:
             for param_group in optimizer.param_groups:
-                param_group['lr'] /= 50
+                param_group['lr'] /= 10
         net.train()
         sum_loss, total = 0.0, 0.0
         for i, data in enumerate(trainloader, 0):
@@ -243,7 +243,8 @@ if __name__ == "__main__":
             #   for shallow classifiers
             for index in range(1, len(outputs)):
                 #   logits distillation.
-                loss += dkd_loss(outputs[index], teacher_output,labels,0.1,0.8,args.temperature) * args.loss_coefficient
+                **kwargs
+                loss += min(kwargs["epoch"] / 20, 1.0) *dkd_loss(outputs[index], teacher_output,labels,1,8,args.temperature) * args.loss_coefficient
                 loss += criterion(outputs[index], labels) * (1 - args.loss_coefficient)
                 #   feature distillation
                 if index != 1:
