@@ -204,7 +204,7 @@ if __name__ == "__main__":
         predicted = [0 for _ in range(5)]
         if epoch in [args.epoch // 3, args.epoch * 2 // 3, args.epoch - 10]:
             for param_group in optimizer.param_groups:
-                param_group['lr'] /= 10
+                param_group['lr'] /= 50
         net.train()
         sum_loss, total = 0.0, 0.0
         for i, data in enumerate(trainloader, 0):
