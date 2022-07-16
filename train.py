@@ -271,7 +271,7 @@ if __name__ == "__main__":
                     '''
                     d1=net.adaptation_layers[index-1](outputs_feature[index]).detach().cpu().numpy()
                     d2=teacher_feature.detach().cpu().numpy()
-                    loss += corr2 * args.feature_loss_coefficient
+                    loss += corr2(d1,d2) * args.feature_loss_coefficient
                     #   the feature distillation loss will not be applied to the shallowest classifier
                 
             sum_loss += loss.item()
