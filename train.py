@@ -45,6 +45,8 @@ import torchvision.transforms as transforms
 import argparse
 from resnet import *
 import torch.nn.functional as F
+import math
+import numpy as np
 from autoaugment import CIFAR10Policy
 from cutout import Cutout
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -117,6 +119,20 @@ def cat_mask(t, mask1, mask2):
     t2 = (t * mask2).sum(1, keepdims=True)
     rt = torch.cat([t1, t2], dim=1)
     return rt
+
+
+def mean2(x):
+    y = np.sum(x) / np.size(x)
+    return y
+
+def corr2(a,b):
+    a = a - mean2(a)
+    b = b - mean2(b)
+    r= (a*b).sum() / math.sqrt((a*a).sum() * (b*b).sum())
+    if r > 0:
+        r=-r
+    return r 
+
 
 
 if args.autoaugment:
@@ -246,13 +262,18 @@ if __name__ == "__main__":
                 **kwargs
                 loss += min(kwargs["epoch"] / 20, 1.0) *dkd_loss(outputs[index], teacher_output,labels,1,8,args.temperature) * args.loss_coefficient
                 loss += criterion(outputs[index], labels) * (1 - args.loss_coefficient)
-                '''
+                
                 #   feature distillation
                 if index != 1:
+                    '''
                     loss += torch.dist(net.adaptation_layers[index-1](outputs_feature[index]), teacher_feature) * \
                             args.feature_loss_coefficient
+                    '''
+                    d1=net.adaptation_layers[index-1](outputs_feature[index]).detach().cpu().numpy()
+                    d2=teacher_feature.detach().cpu().numpy()
+                    loss += corr2 * args.feature_loss_coefficient
                     #   the feature distillation loss will not be applied to the shallowest classifier
-                '''
+                
             sum_loss += loss.item()
             optimizer.zero_grad()
             loss.backward()
