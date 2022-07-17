@@ -126,12 +126,29 @@ def mean2(x):
     return y
 
 def corr2(a,b):
+    #相关系数
     a = a - mean2(a)
     b = b - mean2(b)
     r= (a*b).sum() / math.sqrt((a*a).sum() * (b*b).sum())
     if r > 0:
         r=-r
     return r 
+
+
+def single_stage_at_loss(f_s, f_t, p):
+    def _at(feat, p):
+        return F.normalize(feat.pow(p).mean(1).reshape(feat.size(0), -1))
+
+    s_H, t_H = f_s.shape[2], f_t.shape[2]
+    if s_H > t_H:
+        f_s = F.adaptive_avg_pool2d(f_s, (t_H, t_H))
+    elif s_H < t_H:
+        f_t = F.adaptive_avg_pool2d(f_t, (s_H, s_H))
+    return (_at(f_s, p) - _at(f_t, p)).pow(2).mean()
+
+
+def at_loss(g_s, g_t, p):
+    return sum([single_stage_at_loss(f_s, f_t, p) for f_s, f_t in zip(g_s, g_t)])
 
 
 
@@ -266,13 +283,20 @@ if __name__ == "__main__":
                 #   feature distillation
                 if index != 1:
                     '''
+                    #计算特征图之间的l2范数
                     loss += torch.dist(net.adaptation_layers[index-1](outputs_feature[index]), teacher_feature) * \
                             args.feature_loss_coefficient
                     '''
+                    '''
+                    #计算特征图之间的相关系数
                     d1=net.adaptation_layers[index-1](outputs_feature[index]).detach().cpu().numpy()
                     d2=teacher_feature.detach().cpu().numpy()
                     loss_=corr2(d1,d2)
                     loss += loss_ * args.feature_loss_coefficient
+                    '''
+                    loss += at_loss( net.adaptation_layers[index-1](outputs_feature[index]), teacher_feature, labels)* \
+                            args.feature_loss_coefficient
+                    
                     #   the feature distillation loss will not be applied to the shallowest classifier
                 
             sum_loss += loss.item()
