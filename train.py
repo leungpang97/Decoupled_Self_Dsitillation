@@ -62,7 +62,7 @@ parser.add_argument('--dataset_path', default="data", type=str)
 parser.add_argument('--autoaugment', default=True, type=bool)
 parser.add_argument('--temperature', default=3.0, type=float)
 parser.add_argument('--batchsize', default=128, type=int)
-parser.add_argument('--init_lr', default=0.05, type=float)
+parser.add_argument('--init_lr', default=0.1, type=float)
 args = parser.parse_args()
 print(args)
 
@@ -282,21 +282,22 @@ if __name__ == "__main__":
                 
                 #   feature distillation
                 if index != 1:
-                    '''
+                    
                     #计算特征图之间的l2范数
                     loss += torch.dist(net.adaptation_layers[index-1](outputs_feature[index]), teacher_feature) * \
                             args.feature_loss_coefficient
                     '''
-                    '''
+                    
                     #计算特征图之间的相关系数
                     d1=net.adaptation_layers[index-1](outputs_feature[index]).detach().cpu().numpy()
                     d2=teacher_feature.detach().cpu().numpy()
                     loss_=corr2(d1,d2)
                     loss += loss_ * args.feature_loss_coefficient
                     '''
+                    '''
                     loss += at_loss( net.adaptation_layers[index-1](outputs_feature[index]), teacher_feature, labels)* \
                             args.feature_loss_coefficient
-                    
+                    '''
                     #   the feature distillation loss will not be applied to the shallowest classifier
                 
             sum_loss += loss.item()
